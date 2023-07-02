@@ -1,3 +1,3 @@
-package WL is
+package WL with Pure is
 
 end WL;
