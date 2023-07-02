@@ -1,7 +1,10 @@
 name = "wl_lib"
-description = "Shiny new project"
+description = "Handy library packages"
 version = "0.1.0-dev"
+licenses= "GPL-3.0-or-later"
 
 authors = ["Fraser Wilson"]
 maintainers = ["Fraser Wilson <fraser@thewhitelion.eu>"]
 maintainers-logins = ["blancolioni"]
+tags = ["miscellanea", "utility"]
+website = "https://github.com/blancolioni/wlib"
