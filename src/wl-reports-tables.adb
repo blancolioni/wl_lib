@@ -104,10 +104,12 @@ package body WL.Reports.Tables is
                   Append (Padding);
                   declare
                      Value : constant String := Cell_Text (Col_Index);
+                     Last  : Natural := Value'First - 1;
                   begin
                      for I in 1 .. Width (Col_Index) loop
-                        Append (if I <= Value'Last
-                                then Value (I)
+                        Last := Last + 1;
+                        Append (if Last in Value'Range
+                                then Value (Last)
                                 else Padding);
                      end loop;
                   end;
