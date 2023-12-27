@@ -1,18 +1,19 @@
-with Ada.Characters.Handling;
 with Ada.Strings.Fixed;
 with Ada.Strings.Unbounded;
+with Ada.Tags;
+with Ada.Text_IO;
 
 package body WL.Json is
 
    type Null_Json_Value is
-     new Json_Value with null record;
+     new Atomic_Json_Value with null record;
 
    overriding function Serialize
      (Value : Null_Json_Value)
       return String;
 
    type String_Json_Value is
-     new Json_Value with
+     new Atomic_Json_Value with
       record
          Text : Ada.Strings.Unbounded.Unbounded_String;
       end record;
@@ -27,7 +28,7 @@ package body WL.Json is
    is (Ada.Strings.Unbounded.To_String (Value.Text));
 
    type Integer_Json_Value is
-     new Json_Value with
+     new Atomic_Json_Value with
       record
          Value : Integer;
       end record;
@@ -37,7 +38,7 @@ package body WL.Json is
       return String;
 
    type Float_Json_Value is
-     new Json_Value with
+     new Atomic_Json_Value with
       record
          Value : Float;
       end record;
@@ -47,7 +48,7 @@ package body WL.Json is
       return String;
 
    type Boolean_Json_Value is
-     new Json_Value with
+     new Atomic_Json_Value with
       record
          Value : Boolean;
       end record;
@@ -94,245 +95,6 @@ package body WL.Json is
             Json_Value_Maps.Element (Position));
       end loop;
    end Copy;
-
-   -----------------
-   -- Deserialize --
-   -----------------
-
-   function Deserialize
-     (Text : String)
-      return Json_Value'Class
-   is
-      use Ada.Characters.Handling;
-
-      Index : Positive := Text'First;
-      Eos   : Boolean := Text = "";
-
-      procedure Next;
-
-      function Current return Character
-      is (if Index in Text'Range then Text (Index) else Character'Val (4));
-
-      function At_Space return Boolean
-      is (Ada.Characters.Handling.Is_Space (Current));
-
-      function Next_Token return String;
-
-      procedure Error (Message : String);
-      procedure Expect (Tok : String);
-
-      function Parse_Value
-        (Start : String)
-         return Json_Value'Class;
-
-      -----------
-      -- Error --
-      -----------
-
-      procedure Error (Message : String) is
-      begin
-         raise Constraint_Error with Message;
-      end Error;
-
-      ------------
-      -- Expect --
-      ------------
-
-      procedure Expect (Tok : String) is
-         Check : constant String := Next_Token;
-      begin
-         if Check /= Tok then
-            raise Constraint_Error with
-              "expected " & Tok & " but found " & Check;
-         end if;
-      end Expect;
-
-      ----------
-      -- Next --
-      ----------
-
-      procedure Next is
-      begin
-         Index := Index + 1;
-         Eos := Index > Text'Last;
-      end Next;
-
-      ----------------
-      -- Next_Token --
-      ----------------
-
-      function Next_Token return String is
-      begin
-         while not Eos and then At_Space loop
-            Next;
-         end loop;
-
-         if Eos then
-            return "";
-         end if;
-
-         if Current = '"' then
-            declare
-               Start : constant Positive := Index;
-            begin
-               Next;
-               while not Eos and then Current /= '"' loop
-                  if Current = '\' then
-                     Next;
-                  end if;
-                  Next;
-               end loop;
-
-               if Eos then
-                  raise Constraint_Error with
-                    "unterminated string";
-               end if;
-
-               declare
-                  Last : constant Positive := Index;
-               begin
-                  Next;
-                  return Text (Start .. Last);
-               end;
-            end;
-         elsif Current in '0' .. '9' then
-            declare
-               Start : constant Positive := Index;
-            begin
-               Next;
-               while not Eos and then Current in '0' .. '9' loop
-                  Next;
-               end loop;
-               return Text (Start .. Index - 1);
-            end;
-         elsif Is_Letter (Current) then
-            declare
-               Start : constant Positive := Index;
-            begin
-               while not Eos and then Is_Alphanumeric (Current) loop
-                  Next;
-               end loop;
-
-               declare
-                  Id : constant String := Text (Start .. Index - 1);
-               begin
-                  if Id = "true" or else Id = "false"
-                    or else Id = "null"
-                  then
-                     return Id;
-                  else
-                     raise Constraint_Error with
-                       "invalid identifier";
-                  end if;
-               end;
-            end;
-         elsif Current in '{' | '}' | '[' | ']' | ',' | ':' then
-            declare
-               Result : constant String := (1 => Current);
-            begin
-               Next;
-               return Result;
-            end;
-         else
-            raise Constraint_Error with
-              "bad character: [" & Current & "]";
-         end if;
-      end Next_Token;
-
-      -----------------
-      -- Parse_Value --
-      -----------------
-
-      function Parse_Value
-        (Start : String)
-         return Json_Value'Class
-      is
-      begin
-         if Start = "true" or else Start = "false" then
-            return Boolean_Value (Boolean'Value (Start));
-         elsif Start = "" or else Start = "null" then
-            return Null_Value;
-         elsif Start (Start'First) in '0' .. '9' | '+' | '-' then
-            return Integer_Value (Integer'Value (Start));
-         elsif Start (Start'First) = '"' then
-            return String_Value (Start (Start'First + 1 .. Start'Last - 1));
-         elsif Start = "[" then
-            declare
-               Arr : Json_Array;
-            begin
-               loop
-                  if Eos then
-                     raise Constraint_Error with
-                       "unterminated array";
-                  end if;
-
-                  declare
-                     Tok : constant String := Next_Token;
-                  begin
-                     if Tok = "]" then
-                        return Arr;
-                     else
-                        Arr.Append (Parse_Value (Tok));
-                        if Tok = "]" then
-                           return Arr;
-                        elsif Tok /= "," then
-                           raise Constraint_Error
-                             with "invalid array";
-                        end if;
-                     end if;
-                  end;
-               end loop;
-            end;
-         elsif Start = "{" then
-            declare
-               Object : Json_Object;
-            begin
-               loop
-                  if Eos then
-                     raise Constraint_Error with
-                       "unterminated object";
-                  end if;
-
-                  declare
-                     Tok : constant String := Next_Token;
-                  begin
-                     if Tok = "}" then
-                        return Object;
-                     elsif Tok = "" or else Tok (Tok'First) /= '"' then
-                        Error ("missing property name");
-                     else
-                        declare
-                           Prop_Name : constant String :=
-                             Tok (Tok'First + 1 .. Tok'Last - 1);
-                        begin
-                           Expect (":");
-
-                           Object.Set_Property
-                             (Prop_Name, Parse_Value (Next_Token));
-
-                           declare
-                              Sep : constant String := Next_Token;
-                           begin
-                              if Sep = "}" then
-                                 return Object;
-                              elsif Sep /= "," then
-                                 Error ("missing ',' or '}'");
-                              end if;
-                           end;
-                        end;
-                     end if;
-                  end;
-               end loop;
-            end;
-         else
-            raise Constraint_Error with
-              "syntax error at [" & Start & "]";
-         end if;
-      end Parse_Value;
-
-   begin
-      return Parse_Value (Next_Token);
-   end Deserialize;
 
    -----------------
    -- Float_Value --
@@ -480,6 +242,111 @@ package body WL.Json is
      (Value : Boolean_Json_Value)
       return String
    is (if Value.Value then "true" else "false");
+
+   ----------
+   -- Save --
+   ----------
+
+   procedure Save
+     (Value : Json_Value'Class;
+      Path  : String)
+   is
+      use Ada.Text_IO;
+      File : File_Type;
+
+      procedure Write_Indented
+        (This   : Json_Value'Class;
+         Indent : Positive_Count);
+
+      procedure Write_String
+        (Text : String);
+
+      --------------------
+      -- Write_Indented --
+      --------------------
+
+      procedure Write_Indented
+        (This   : Json_Value'Class;
+         Indent : Positive_Count)
+      is
+         Child_Indent : constant Positive_Count := Indent + 4;
+      begin
+         if This in Atomic_Json_Value'Class then
+            Put (This.Serialize);
+         elsif This in Json_Array'Class then
+            Put_Line ("[");
+            declare
+               First : Boolean := True;
+            begin
+               for Value of Json_Array (This).Vector loop
+                  if First then
+                     First := False;
+                  else
+                     Put_Line (",");
+                  end if;
+                  Set_Col (Child_Indent);
+                  Write_Indented (Value, Child_Indent);
+               end loop;
+            end;
+            New_Line;
+            Set_Col (Indent);
+            Put ("]");
+         elsif This in Json_Object'Class then
+            Put_Line ("{");
+            declare
+               First : Boolean := True;
+            begin
+               for Position in Json_Object (This).Properties.Iterate loop
+                  if First then
+                     First := False;
+                  else
+                     Put_Line (",");
+                  end if;
+                  Set_Col (Child_Indent);
+                  Write_String (Json_Value_Maps.Key (Position));
+                  Put (": ");
+                  Write_Indented
+                    (Json_Value_Maps.Element (Position), Child_Indent);
+               end loop;
+            end;
+            New_Line;
+            Set_Col (Indent);
+            Put ("}");
+         else
+            raise Program_Error with
+              "unknown json value type: "
+              & Ada.Tags.External_Tag (This'Tag);
+         end if;
+      end Write_Indented;
+
+      ------------------
+      -- Write_String --
+      ------------------
+
+      procedure Write_String
+        (Text : String)
+      is
+         Image : String (1 .. Text'Length * 2);
+         Last  : Natural := 0;
+      begin
+         for Ch of Text loop
+            Last := Last + 1;
+            if Ch in '"' | '\' then
+               Image (Last) := '\';
+               Last := Last + 1;
+            end if;
+            Image (Last) := Ch;
+         end loop;
+         Put ('"' & Image (1 .. Last) & '"');
+      end Write_String;
+
+   begin
+      Create (File, Out_File, Path);
+      Set_Output (File);
+      Write_Indented (Value, 1);
+      Set_Output (Standard_Output);
+      Close (File);
+   end Save;
 
    ------------------
    -- Set_Property --

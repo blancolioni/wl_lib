@@ -28,13 +28,15 @@ package WL.Json is
       Name  : String)
       return String;
 
-   function Deserialize
-     (Text : String)
-      return Json_Value'Class;
-
    function Image
      (Value : Json_Value)
       return String;
+
+   procedure Save
+     (Value : Json_Value'Class;
+      Path  : String);
+   --  Write an indented representaion of Value to
+   --  the file indicated by Path.
 
    type Json_Object is new Json_Value with private;
 
@@ -116,5 +118,7 @@ private
 
    overriding function Image (Item : Json_Array) return String
    is ("[Array]");
+
+   type Atomic_Json_Value is abstract new Json_Value with null record;
 
 end WL.Json;
