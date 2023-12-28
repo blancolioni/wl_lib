@@ -1,0 +1,22 @@
+name = "tests"
+description = "Test suite for wl_lib"
+version = "0.1.0-dev"
+
+authors = ["Fraser Wilson"]
+maintainers = ["Fraser Wilson <fraser@thewhitelion.eu>"]
+maintainers-logins = ["blancolioni"]
+licenses = "GPL-3.0-or-later"
+website = ""
+tags = ["test"]
+
+executables = ["tests"]
+
+[build-profiles]
+"*" = "development"
+
+[[depends-on]]
+wl_lib = "*"
+
+[[pins]]
+wl_lib = { path = ".." }
+
