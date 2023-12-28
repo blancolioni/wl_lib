@@ -59,6 +59,11 @@ package body WL.Json is
 
    function To_Safe_String (Text : String) return String;
 
+   function Parse_String
+     (S : String)
+      return Json_Value'Class
+      is separate;
+
    ------------
    -- Append --
    ------------
@@ -105,6 +110,18 @@ package body WL.Json is
       return Result : constant Float_Json_Value := Float_Json_Value'
         (Value => F);
    end Float_Value;
+
+   -----------------
+   -- Deserialize --
+   -----------------
+
+   function Deserialize
+     (Text : String)
+      return Json_Value'Class
+   is
+   begin
+      return Parse_String (Text);
+   end Deserialize;
 
    ------------------
    -- Get_Property --

@@ -32,6 +32,10 @@ package WL.Json is
      (Value : Json_Value)
       return String;
 
+   function Deserialize
+     (Text : String)
+     return Json_Value'Class;
+
    procedure Save
      (Value : Json_Value'Class;
       Path  : String);
