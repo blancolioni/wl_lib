@@ -47,6 +47,10 @@ Priority queues.
 
 Read and write image files in various formats
 
+## Json
+
+Serialize, deserialize, and manipulate Json values
+
 ## Numerics.Generic_Trigonmetry
 
 Trigonometry with a private Angle type.
@@ -82,6 +86,10 @@ Hashed_Maps.Map instantiated with case-insensitive String key.
 ## String_Sets
 
 Represent a set of strings.  Case-insensitive.
+
+## Unit
+
+Unit testing support
 
 ## Work
 
