@@ -1,6 +1,6 @@
 name = "wl_lib"
 description = "Handy library packages"
-version = "0.1.2-dev"
+version = "0.1.2"
 licenses= "GPL-3.0-or-later"
 
 authors = ["Fraser Wilson"]
