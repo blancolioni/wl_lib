@@ -81,7 +81,7 @@ package body WL.Files.ELF is
            (Section_Record'
               (Header => Section_Header'
                    (Sh_Name      => Save_Name (File, Rel_Name),
-                    Sh_Type      => Section_Header_Type'Pos (Rel),
+                    Sh_Type      => Section_Header_Type'Pos (Sht_Rel),
                     Sh_Flags     => 2 ** 6,
                     Sh_Addr      => 0,
                     Sh_Offset    => 0,
@@ -155,7 +155,7 @@ package body WL.Files.ELF is
       end if;
 
       for Section of File.Section_List loop
-         if Section.Header.Sh_Type = Section_Header_Type'Pos (Rel) then
+         if Section.Header.Sh_Type = Section_Header_Type'Pos (Sht_Rel) then
             Section.Header.Sh_Link := Elf_Word_32 (File.Section_List.Length);
          end if;
       end loop;
@@ -248,7 +248,7 @@ package body WL.Files.ELF is
         Section_Record'
           (Header => Section_Header'
              (Sh_Name      => 0,
-              Sh_Type      => Section_Header_Type'Pos (Symtab),
+              Sh_Type      => Section_Header_Type'Pos (Sht_Symtab),
               Sh_Flags     => 0,
               Sh_Addr      => 0,
               Sh_Offset    => 0,
@@ -266,7 +266,7 @@ package body WL.Files.ELF is
         Section_Record'
           (Header => Section_Header'
              (Sh_Name      => 0,
-              Sh_Type      => Section_Header_Type'Pos (Strtab),
+              Sh_Type      => Section_Header_Type'Pos (Sht_Strtab),
               Sh_Flags     => 0,
               Sh_Addr      => 0,
               Sh_Offset    => 0,
@@ -394,7 +394,7 @@ package body WL.Files.ELF is
    is
       use type System.Storage_Elements.Storage_Element;
       Str_Sec : constant Section_Entry :=
-                  Get_Section_Entry (File, Strtab);
+                  Get_Section_Entry (File, Sht_Strtab);
       Rec     : Section_Record renames
                   File.Section_List (Str_Sec.Position);
       First   : constant Natural := Natural (Offset);
@@ -428,7 +428,7 @@ package body WL.Files.ELF is
                   Natural (Relocation_Entry'Size) / 8;
    begin
       for Rec of File.Section_List loop
-         if Section_Header_Type'Val (Rec.Header.Sh_Type) = Rel then
+         if Section_Header_Type'Val (Rec.Header.Sh_Type) = Sht_Rel then
             declare
                Symbols : constant Elf_Word_16 :=
                            Elf_Word_16 (Rec.Header.Sh_Link);
@@ -502,7 +502,7 @@ package body WL.Files.ELF is
                    Section      : Elf_Word_16))
    is
       Rec : Section_Record renames
-              File.Section_List (Get_Section_Entry (File, Symtab).Position);
+              File.Section_List (Get_Section_Entry (File, Sht_Symtab).Position);
       Size   : constant Positive := Natural (Symbol_Table_Entry'Size) / 8;
       Offset : Natural := Size;
    begin
@@ -778,10 +778,24 @@ package body WL.Files.ELF is
                   Put ("  [");
                   Put (Natural (Section.Index), 2);
                   Put ("] ");
-                  Put_String (Get_String (File, Section.Header.Sh_Name), 15);
-                  Put ("                   ");
-                  Put_Hex (Section.Header.Sh_Type, 8);
-                  Put_String ("", 8);
+                  Put_String (Get_String (File, Section.Header.Sh_Name), 18);
+                  declare
+                     Sh_Type : Section_Header_Type;
+                  begin
+                     Sh_Type :=
+                       Section_Header_Type'Val (Section.Header.Sh_Type);
+
+                     declare
+                        Img : constant String :=
+                                Section_Header_Type'Image (Sh_Type);
+                     begin
+                        Put_String (Img (5 .. Img'Last), 16);
+                     end;
+                  exception
+                     when Constraint_Error =>
+                        Put_String ("UNKNOWN", 16);
+                  end;
+
                   Put_Hex (Section.Header.Sh_Addr, 8);
                   Put (" ");
                   Put_Hex (Section.Header.Sh_Offset, 6);

@@ -21,8 +21,9 @@ package WL.Files.ELF is
      (Nul, Load, Dynamic, Interp, Note);
 
    type Section_Header_Type is
-     (Nul, Progbits, Symtab, Strtab, Rela, Hash, Dynamic, Note,
-      Nobits, Rel, Shlib);
+     (Sht_Null, Sht_Progbits, Sht_Symtab, Sht_Strtab,
+      Sht_Rela, Sht_Hash, Sht_Dynamic, Sht_Note,
+      Sht_Nobits, Sht_Rel, Sht_Shlib);
 
    SHN_UNDEF : constant := 0;
 
