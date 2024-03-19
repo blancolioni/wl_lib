@@ -449,7 +449,7 @@ package body WL.Files.ELF is
                      end loop;
 
                      declare
-                        Sym_Idx : constant Elf_Word_32 := Ent.Info / 256;
+                        --  Sym_Idx : constant Elf_Word_32 := Ent.Info / 256;
                         Sym_Ent : constant Symbol_Table_Entry :=
                                     Get_Symbol_Entry
                                       (File, Elf_Word_32 (Symbols),
@@ -502,7 +502,8 @@ package body WL.Files.ELF is
                    Section      : Elf_Word_16))
    is
       Rec : Section_Record renames
-              File.Section_List (Get_Section_Entry (File, Sht_Symtab).Position);
+              File.Section_List
+                (Get_Section_Entry (File, Sht_Symtab).Position);
       Size   : constant Positive := Natural (Symbol_Table_Entry'Size) / 8;
       Offset : Natural := Size;
    begin
@@ -772,7 +773,7 @@ package body WL.Files.ELF is
                      S (1 .. Last) :=
                        Text (Text'First .. Text'First + Last - 1);
                      Put (S);
-                  end;
+                  end Put_String;
 
                begin
                   Put ("  [");

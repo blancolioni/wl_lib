@@ -31,7 +31,6 @@ package WL.Files.ELF is
 
    type Address_32 is mod 2 ** 32;
 
-
    procedure Open
      (File : in out File_Type;
       Mode : File_Mode;
@@ -95,7 +94,7 @@ package WL.Files.ELF is
 
    function Get_Symbol_Index
      (Relocation : Relocation_Entry)
-      return Elf_WOrd_32;
+      return Elf_Word_32;
 
    function Get_Offset (Relocation : Relocation_Entry) return Address_32;
    function Get_Type (Relocation : Relocation_Entry) return Elf_Word_8;
@@ -298,11 +297,11 @@ private
 
    function Get_Symbol_Index
      (Relocation : Relocation_Entry)
-      return Elf_WOrd_32
+      return Elf_Word_32
    is (Relocation.Info / 256);
 
    function Get_Type (Relocation : Relocation_Entry) return Elf_Word_8
-   is (Elf_WOrd_8 (Relocation.Info mod 256));
+   is (Elf_Word_8 (Relocation.Info mod 256));
 
    function Get_Offset (Relocation : Relocation_Entry) return Address_32
    is (Relocation.Offset);
