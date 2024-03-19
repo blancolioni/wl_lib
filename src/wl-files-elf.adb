@@ -341,6 +341,7 @@ package body WL.Files.ELF is
          then
             return Index;
          end if;
+         Index := Index + 1;
       end loop;
       return 0;
    end Get_Section;
