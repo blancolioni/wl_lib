@@ -655,6 +655,7 @@ package body WL.Files.ELF is
       Mode : File_Mode;
       Path : String)
    is
+      pragma Unreferenced (Mode);
       use type System.Storage_Elements.Storage_Offset;
    begin
       File.Reading := True;
