@@ -92,6 +92,16 @@ package WL.Json is
      (To     : in out Json_Array'Class;
       Value  : Json_Value'Class);
 
+   function Length
+     (This : Json_Array'Class)
+      return Natural;
+
+   function Element
+     (This  : Json_Array'Class;
+      Index : Positive)
+      return Json_Value'Class
+     with Pre => Index <= This.Length;
+
 private
 
    type Json_Value is abstract tagged null record;
@@ -122,6 +132,17 @@ private
 
    overriding function Image (Item : Json_Array) return String
    is ("[Array]");
+
+   function Length
+     (This : Json_Array'Class)
+      return Natural
+   is (This.Vector.Last_Index);
+
+   function Element
+     (This  : Json_Array'Class;
+      Index : Positive)
+      return Json_Value'Class
+   is (This.Vector.Element (Index));
 
    type Atomic_Json_Value is abstract new Json_Value with null record;
 
