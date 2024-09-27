@@ -54,6 +54,8 @@ package body WL.Unit is
                   Ada.Text_IO.Put_Line (Item.Test.Element.Name
                                         & ": found "
                                         & Found (Result));
+                  Ada.Text_IO.Put_Line
+                    (Ada.Strings.Unbounded.To_String (Result.Cause));
                   Failure := Failure + 1;
                end if;
             end;
@@ -66,6 +68,10 @@ package body WL.Unit is
                Ada.Text_IO.Put_Line (Item.Test.Element.Name
                                      & ": error: "
                                      & Error_Message (Item.Result.Element));
+               if Suite.Verbose_Errors then
+                  Ada.Text_IO.Put_Line
+                    (Ada.Exceptions.Exception_Information (E));
+               end if;
          end;
       end loop;
    end Run_Tests;
@@ -81,5 +87,17 @@ package body WL.Unit is
    begin
       Suite.Is_Verbose := Enabled;
    end Verbose;
+
+   --------------------
+   -- Verbose_Errors --
+   --------------------
+
+   procedure Verbose_Errors
+     (Suite   : in out Test_Suite;
+      Enabled : Boolean := True)
+   is
+   begin
+      Suite.Verbose_Errors := Enabled;
+   end Verbose_Errors;
 
 end WL.Unit;

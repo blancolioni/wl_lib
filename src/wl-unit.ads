@@ -60,6 +60,10 @@ package WL.Unit is
      (Suite   : in out Test_Suite;
       Enabled : Boolean := True);
 
+   procedure Verbose_Errors
+     (Suite   : in out Test_Suite;
+      Enabled : Boolean := True);
+
    procedure Run_Tests
      (Suite   : in out Test_Suite;
       Success : out Natural;
@@ -144,8 +148,9 @@ private
 
    type Test_Suite is tagged
       record
-         List       : Unit_Test_Lists.List;
-         Is_Verbose : Boolean := False;
+         List           : Unit_Test_Lists.List;
+         Is_Verbose     : Boolean := False;
+         Verbose_Errors : Boolean := False;
       end record;
 
 end WL.Unit;
