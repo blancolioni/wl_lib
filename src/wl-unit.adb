@@ -3,6 +3,10 @@ with Ada.Text_IO;
 
 package body WL.Unit is
 
+   ------------
+   -- Append --
+   ------------
+
    procedure Append
      (To   : in out Test_Suite;
       Test : Unit_Test'Class)

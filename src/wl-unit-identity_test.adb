@@ -43,7 +43,7 @@ package body WL.Unit.Identity_Test is
       if Expected = Found then
          return Test_Success;
       else
-         return Test_Failure (Expected, Found);
+         return Test_Failure (Expected, Found, "");
       end if;
    end Try;
 

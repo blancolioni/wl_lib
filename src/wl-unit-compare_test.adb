@@ -48,11 +48,14 @@ package body WL.Unit.Compare_Test is
    is
       Expected : constant Result_Type := This.Expected.Element;
       Result   : constant Result_Type := This.Test.all;
+      Index    : constant Natural := Compare (Expected, Result);
    begin
-      if Result = Expected then
+      if Index = 0 then
          return Test_Success;
       else
-         return Test_Failure (Image (Expected), Image (Result));
+         return Test_Failure
+           (Image (Expected), Image (Result),
+            "Results differ at position" & Index'Image);
       end if;
    end Try;
 

@@ -1,7 +1,7 @@
 generic
    type Result_Type (<>) is private;
    with function Image (Result : Result_Type) return String;
-   with function "=" (Left, Right : Result_Type) return Boolean is <>;
+   with function Compare (Left, Right : Result_Type) return Natural;
 package WL.Unit.Compare_Test is
 
    type Test_Runner is access function return Result_Type;

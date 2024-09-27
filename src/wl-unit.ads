@@ -11,7 +11,8 @@ package WL.Unit is
 
    function Test_Failure
      (Expected : String;
-      Found    : String)
+      Found    : String;
+      Message  : String)
       return Test_Result;
    --  Construct and return a test result value indicating
    --  a failed test.
@@ -78,6 +79,7 @@ private
             when Failure =>
                Expected : Ada.Strings.Unbounded.Unbounded_String;
                Found    : Ada.Strings.Unbounded.Unbounded_String;
+               Cause    : Ada.Strings.Unbounded.Unbounded_String;
             when Error =>
                Message  : Ada.Strings.Unbounded.Unbounded_String;
          end case;
@@ -88,11 +90,13 @@ private
 
    function Test_Failure
      (Expected : String;
-      Found    : String)
+      Found    : String;
+      Message  : String)
       return Test_Result
    is (Result   => Failure,
        Expected => Ada.Strings.Unbounded.To_Unbounded_String (Expected),
-       Found    => Ada.Strings.Unbounded.To_Unbounded_String (Found));
+       Found    => Ada.Strings.Unbounded.To_Unbounded_String (Found),
+       Cause    => Ada.Strings.Unbounded.To_Unbounded_String (Message));
 
    function Test_Error
      (Message : String)
