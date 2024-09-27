@@ -336,7 +336,10 @@ function Parse_String (S : String) return Json_Value'Class is
 
 begin
    Start;
-   return Result : constant Json_Value'Class := Parse_Json_Element do
+   declare
+      Result : constant Json_Value'Class := Parse_Json_Element;
+   begin
       Finish;
-   end return;
+      return Result;
+   end;
 end Parse_String;
