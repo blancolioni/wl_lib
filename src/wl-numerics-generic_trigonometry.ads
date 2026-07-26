@@ -49,7 +49,10 @@ package WL.Numerics.Generic_Trigonometry is
 
 private
 
-   type Angle is new Real range -Ada.Numerics.Pi .. Ada.Numerics.Pi;
+   Min_Angle : constant := -Ada.Numerics.Pi;
+   Max_Angle : constant := Ada.Numerics.Pi;
+
+   type Angle is new Real range Min_Angle .. Max_Angle;
 
    Pi : constant Angle := Angle (Ada.Numerics.Pi);
 
